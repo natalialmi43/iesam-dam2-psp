@@ -12,7 +12,7 @@ package es.dam.psp.ut1.ejemplos
  * Salida: "[PID] empiezo, voy a tardar N s" y, al acabar, "[PID] termino".
  */
 fun main(args: Array<String>) {
-    val segundos = args.firstOrNull()?.toLongOrNull() ?: 3   // 3 s si no hay argumento o no es un número
+    val segundos = args.firstOrNull()?.toLongOrNull() ?: 300   // 3 s si no hay argumento o no es un número
     val pid = ProcessHandle.current().pid()
     println("[$pid] empiezo, voy a tardar $segundos s")
     Thread.sleep(segundos * 1000)
