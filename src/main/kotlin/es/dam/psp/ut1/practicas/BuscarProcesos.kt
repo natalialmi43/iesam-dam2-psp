@@ -26,6 +26,8 @@ fun main(args: Array<String>) {
         .forEach { p ->
             val info = p.info()
             // para conseguir la hora exacta a la que arranco el proceso
+            // El .map es una función que actúa como un filtro o traductor que se asoma solo si la caja tiene algo dentro.
+            // Es una herramienta para transformar un dato que ya tienes dentro de un contenedor.
             val inicio = info.startInstant().map { it.toString() }.orElse("-")
             // Pregunta cuántos segundos o milisegundos de procesador ha consumido ese programa desde que empezó
             val cpu = info.totalCpuDuration().map { "${it.toMillis()} ms" }.orElse("-")
