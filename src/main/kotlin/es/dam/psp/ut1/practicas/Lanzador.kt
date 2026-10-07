@@ -38,27 +38,33 @@ fun main() {
         //         (apuntes, apartado 6.2). Solución sin hilos: redirige la salida a un fichero temporal
         //         (File.createTempFile("lanzador", ".txt") + redirectOutput(...)).
 
+        //Fichero salida temproarl
         val salidaTmp = File.createTempFile("lanzador", ".txt")
+        // Si se cierra lo borras
         salidaTmp.deleteOnExit()
 
+        //Es la fabrica de procesos el PB , y se lo pasamos a la JVM.comandoShell
         val pb = ProcessBuilder(Jvm.comandoShell(orden))
+        //Se guarda enel fichero de antes
         pb.redirectOutput(salidaTmp)
+        // para redireccionar el error al fichero de antes si el comando falla
         pb.redirectErrorStream(true)
 
 
         // TODO 3.b: arráncalo y mide el tiempo desde start() hasta que termina
         //           (System.nanoTime() antes y después, o measureTime { }).
+        //Se empieza a medir el tiempo en nanosegundos y justo despues le damos al pb para que se inicie
         val inicioNano = System.nanoTime()
         val proceso = pb.start()
 
         // TODO 3.c: espera como máximo TIMEOUT_S segundos (waitFor(TIMEOUT_S, TimeUnit.SECONDS)); si no
         //           ha terminado, termina también a sus descendientes (descendants()) y luego destroy();
         //           si sigue vivo, destroyForcibly(). En ese caso el código que guardes será -1.
+        //Si proceso termina en lo que marca constante (unidad segundos) entonces exitValue = 0
         val codigoSalida = if (proceso.waitFor(TIMEOUT_S, TimeUnit.SECONDS)) {
-            // Si terminó a tiempo, devolvemos su código de salida real
             proceso.exitValue()
         } else {
-            // Si se pasa del tiempo: matamos descendientes, proceso y devolvemos -1
+            // Si se pasa del tiempo matamos descendientes, proceso y devuelve -1
             proceso.descendants().forEach { it.destroyForcibly() }
             proceso.destroyForcibly()
             println("\n[AVISO] La orden superó el tiempo límite de $TIMEOUT_S segundos y fue terminada.")
