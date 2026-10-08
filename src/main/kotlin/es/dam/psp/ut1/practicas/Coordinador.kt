@@ -35,6 +35,7 @@ const val CLASE_HIJO = "es.dam.psp.ut1.practicas.ContadorKt"   // main de Contad
 fun lanzarContador(fichero: File): Process {
     val pb = Jvm.proceso(CLASE_HIJO)
     pb.redirectInput(fichero)
+    //EL INHERIT hereda los errores para verlos directamente en la consola
     pb.redirectError(ProcessBuilder.Redirect.INHERIT)
     return pb.start()
 }
@@ -44,7 +45,9 @@ fun lanzarContador(fichero: File): Process {
  * Si el código de salida no es 0, lanza una IllegalStateException con un mensaje claro.
  */
 fun recogerResultado(fichero: File, hijo: Process): Resultado {
+    // bloquea al padre para que el hijo escriba algo hasta que mande salto de linea o termine
     val linea = hijo.inputStream.bufferedReader().readLine()
+    // suspende al padre hasta que el hijo muere y devuelve el codigo de salida
     val codigoSalida = hijo.waitFor()
 
     if ( codigoSalida!=0){
@@ -70,7 +73,7 @@ fun recogerResultado(fichero: File, hijo: Process): Resultado {
 fun secuencial(ficheros: List<File>): List<Resultado> {
     val resultados = mutableListOf<Resultado>()
     for (fichero in ficheros){
-        val proceso = lanzarContador((fichero))
+        val proceso = lanzarContador(fichero)
         resultados.add(recogerResultado(fichero,proceso))
     }
     return resultados
@@ -79,9 +82,10 @@ fun secuencial(ficheros: List<File>): List<Resultado> {
 
 /** Lanza TODOS los hijos a la vez y después recoge los resultados. */
 fun concurrente(ficheros: List<File>): List<Resultado> {
+    //Sirve como arranque multiple, se usa Pair se usa para emparejar para saber que proceso estaba leyendo
     val procesos = ficheros.map { fichero -> Pair(fichero, lanzarContador(fichero)) }
 
-    return procesos.map { (ficheros, proceso) -> recogerResultado(ficheros, proceso) }
+    return procesos.map { (fichero, proceso) -> recogerResultado(fichero, proceso) }
 }
 
 fun main() {
@@ -122,4 +126,7 @@ fun main() {
     println("\nTiempo Secuencial:  $t1")
     println("Tiempo Concurrente: $t2")
     // Práctica 4.f: ejecútalo tres veces y calcula la aceleración t1 / t2
+
+    val aceleracion = t1/t2
+    println("Aceleración: $aceleracion")
 }
